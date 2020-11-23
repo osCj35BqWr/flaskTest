@@ -4,11 +4,12 @@
 <p><p>
     <img src="{{ url_for('graph1') }}"></img>
 <div class="form-group">
-    <label for="selector">Select Image</label>
+    <label for="selector">選択した時間の解析画像を表示します</label>
     <select id="selector" class="form-control" style="width:auto;" onchange="getImg(this)" >
     <!--<select id=selector onchange="getImg(this)">-->
+        <option value="">時間を選択</option>
         {% for entry in entries %}
-        <option value="{{ entry.MeasureDateTime }}">{{ entry.fileName }}</option>
+        <option value="{{ entry.MeasureDateTime }}">{{ entry.MeasureDateTimeStr }}</option>
         {% else %}
         {% endfor %}
     </select>
@@ -27,6 +28,9 @@ function getImg(obj) {
     var value = obj.options[idx].value;
     var plotdata = document.getElementById('s3img');
 
+    if (!value){
+        return;
+    }
     var eventDataBaseUrl = "{{ url_for('get_img_from_s3', func='DUMMY_VALUE') }}";
     var actualDataUrl = eventDataBaseUrl.replace(/DUMMY_VALUE/, value);
 

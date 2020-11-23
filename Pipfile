@@ -14,6 +14,7 @@ awscli = "*"
 pandas = "*"
 japanize-matplotlib = "*"
 pynamodb = "*"
+python-dateutil = "*"
 
 [dev-packages]
 

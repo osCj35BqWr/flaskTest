@@ -20,6 +20,7 @@ import matplotlib.dates as mdates
 import os
 import base64
 from datetime import datetime, timedelta, timezone
+from dateutil.parser import parse
 
 
 @app.route('/')
@@ -39,6 +40,13 @@ def show_entries():
     # entries = Entry.query("aaa", Entry.MeasureDateTime.contains('20201123'))
     entries = sorted(entries, key=lambda x: x.MeasureDateTime)
     #entries = sorted(entries, key=lambda x: x.MeasureDateTime, reverse=True)
+
+    for entry in entries:
+        try:
+            entry.MeasureDateTimeStr = parse(entry.MeasureDateTime).strftime('%m/%d %H:%M')
+        except:
+            entry.MeasureDateTimeStr = "時間不明"
+
     return render_template('index.html', entries=entries)
     #return render_template('index.html')
     #return('<html><h1>実行結果</h1><p><p><img src="/graph1.png" ></img></html>')

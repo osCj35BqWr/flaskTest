@@ -15,4 +15,5 @@ class Entry(Model):
     MeasureDateTime = UnicodeAttribute(hash_key=True, null=False)
     value = NumberAttribute(null=True)
     fileName = UnicodeAttribute(null=True)
+    MeasureDateTimeStr = UnicodeAttribute(null=True)
 
