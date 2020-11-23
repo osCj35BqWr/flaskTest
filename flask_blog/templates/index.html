@@ -1,4 +1,22 @@
 {% extends "layout.html" %}
 {% block body %}
-<html><h1>測定結果</h1><p><p><img src="/graph1.png" ></img></html>
+<h1>測定結果</h1>
+<p><p>
+    <img src="/graph1.png" ></img>
+<div class="form-group">
+    <label for="selector">Select Image</label>
+    <select id="selector" class="form-control" style="width:auto;" onchange="getImg(this)" >
+    <!--<select id=selector onchange="getImg(this)">-->
+        {% for entry in entries %}
+        <option value="{{ entry.MeasureDateTime }}">{{ entry.fileName }}</option>
+        {% else %}
+        {% endfor %}
+    </select>
+</div>
+
+<br/>
+<img id="s3img" width="70%"></img>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="/static/js/script.js"></script>
 {% endblock %}
