@@ -1,5 +1,6 @@
 from flask import request, redirect, url_for, render_template, flash, session
 from flask_blog import app
+from flask_blog.models.entries import Entry
 from flask_login import login_required
 from datetime import datetime
 from flask import Flask, render_template, make_response
@@ -20,15 +21,13 @@ import os
 import base64
 
 
-de = None
-
 @app.route('/')
 @login_required
 def show_entries():
-    #entries = Entry.scan()
-    #entries = sorted(entries, key=lambda x: x.id, reverse=True)
-    #return render_template('index.html', entries=entries)
-    return render_template('index.html')
+    entries = Entry.scan()
+    #entries = sorted(entries, key=lambda x: x.MeasureDateTime, reverse=True)
+    return render_template('index.html', entries=entries)
+    #return render_template('index.html')
     #return('<html><h1>実行結果</h1><p><p><img src="/graph1.png" ></img></html>')
 
 @app.route('/graph1.png')
@@ -46,9 +45,6 @@ def graph1():
     response = table.scan()
 
     df = pd.json_normalize(response["Items"])
-
-    # TODO pythonらしい書き方はどんな感じか
-    de = df
 
     # YYYYMMDDHHMMSS形式を日付として認識させる
     df.MeasureDateTime = pd.to_datetime(df.MeasureDateTime)
@@ -97,15 +93,20 @@ def graph1():
 
 
 # S3の画像をbase64にエンコードして返却
-@app.route('/img/<func>')
+@app.route('/img/<func>', methods=['GET'])
 @login_required
 def get_img_from_s3(func):
 
+    print(func)
     s3 = boto3.client('s3')
     bucket_name = os.environ['bucket_name']
-    file_path = 'FILE_PATH'
-    response = s3.get_object(Bucket=bucket_name, Key=file_path)
+    file_path = Entry.get(str(func))
+    if file_path is None:
+        return
+
+    response = s3.get_object(Bucket=bucket_name, Key=file_path.fileName)
     body = response['Body'].read()
     img = base64.b64encode(body)
+
     return img
 

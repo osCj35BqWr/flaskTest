@@ -7,13 +7,12 @@ import os
 
 class Entry(Model):
     class Meta:
-        # 名称変更する
-        table_name = "serverless_blog_entries"
+        table_name = os.environ.get('table_name')
         region = 'ap-northeast-1'
         aws_access_key_id = os.environ.get('SERVERLESS_AWS_ACCESS_KEY_ID')
         aws_secret_access_key = os.environ.get('SERVERLESS_AWS_SECRERT_KEY')
 
-    id = NumberAttribute(hash_key=True, null=False)
-    title = UnicodeAttribute(null=True)
-    text = UnicodeAttribute(null=True)
-    created_at = UTCDateTimeAttribute(default=datetime.now)
+    MeasureDateTime = UnicodeAttribute(hash_key=True, null=False)
+    value = NumberAttribute(null=True)
+    fileName = UnicodeAttribute(null=True)
+
