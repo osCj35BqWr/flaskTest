@@ -10,6 +10,14 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 import numpy as np
+import json
+import boto3
+import pandas as pd
+import matplotlib.pyplot as plt
+import japanize_matplotlib
+import matplotlib.dates as mdates
+import os
+
 
 @app.route('/')
 @login_required
@@ -23,20 +31,53 @@ def show_entries():
 @app.route('/graph1.png')
 @login_required
 def graph1():
-    fig = plt.figure()
-    ax = fig.add_subplot()
+    # 【AWS IAM関連情報】
+    #  IAMユーザーに割り当てたポリシー
+    #   AmazonDynamoDBFullAccess
+    #   AWSLambdaDynamoDBExecutionRole
+    #  profile名
+    #   環境編巣にAWS_DEFAULT_PROFILE, AWS_PROFILEとして定義した。
+    dynamodb = boto3.resource("dynamodb")
 
-    x = np.arange(0, 100, 0.1)
-    y = x ** 2
+    table = dynamodb.Table(os.environ['table_name'])
+    response = table.scan()
 
-    plt.cla()
+    df = pd.json_normalize(response["Items"])
 
-    plt.title('Graph')
-    plt.legend()
+    # YYYYMMDDHHMMSS形式を日付として認識させる
+    df.MeasureDateTime = pd.to_datetime(df.MeasureDateTime)
+
+    # data["value"]はDecimalで入っているが。
+    # Decimalは直接表示できないので、floatに変換
+    df = df.astype({"value": float})
+
+    # 日付でソートする。戻り値を受け取らないとソートされないので注意
+    df = df.sort_values(by='MeasureDateTime')
+
+    fig, ax = plt.subplots()
+
+    # x軸の目盛りは1時間ごとにする（set_major_locatorで目盛りを打つ場所を決める）
+    ax.xaxis.set_major_locator(mdates.HourLocator(interval=4))
+    # x軸の目盛りの表示形式を設定する（set_major_formatterで目盛りに書く内容を決める）
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\n%H:%M'))
+    # 補助目盛線を付加する
+    ax.xaxis.set_minor_locator(mdates.HourLocator())
+
+
+    plt.plot(df.MeasureDateTime, df.value)
+    # ax.plot(df.MeasureDateTime, df.value)というのもある
+    plt.title('時間と人数の推移')
+    # plt.xlabel('X軸ラベル')
+    # plt.ylabel('人数')
+    plt.ylabel("人数", rotation=0)
+    # 縦書きにする場合
+    # ax.set_ylabel("人\n数", rotation=0, va='center')
+
     plt.grid()
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.plot(x, y)
+    # 補助目盛は点線にする
+    plt.grid(True, which="minor", linestyle="--")
+    # 主目盛は実線
+    # plt.grid(True, which="major", linestyle="-")
 
     canvas = FigureCanvasAgg(fig)
     png_output = BytesIO()
