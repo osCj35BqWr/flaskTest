@@ -13,6 +13,7 @@ zappa = "*"
 awscli = "*"
 pandas = "*"
 japanize-matplotlib = "*"
+pynamodb = "*"
 
 [dev-packages]
 

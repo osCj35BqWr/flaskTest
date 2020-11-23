@@ -17,7 +17,10 @@ import matplotlib.pyplot as plt
 import japanize_matplotlib
 import matplotlib.dates as mdates
 import os
+import base64
 
+
+de = None
 
 @app.route('/')
 @login_required
@@ -43,6 +46,9 @@ def graph1():
     response = table.scan()
 
     df = pd.json_normalize(response["Items"])
+
+    # TODO pythonらしい書き方はどんな感じか
+    de = df
 
     # YYYYMMDDHHMMSS形式を日付として認識させる
     df.MeasureDateTime = pd.to_datetime(df.MeasureDateTime)
@@ -88,3 +94,18 @@ def graph1():
     response.headers['Content-Type'] = 'image/png'
     response.headers['Content-Length'] = len(data)
     return response
+
+
+# S3の画像をbase64にエンコードして返却
+@app.route('/img/<func>')
+@login_required
+def get_img_from_s3(func):
+
+    s3 = boto3.client('s3')
+    bucket_name = os.environ['bucket_name']
+    file_path = 'FILE_PATH'
+    response = s3.get_object(Bucket=bucket_name, Key=file_path)
+    body = response['Body'].read()
+    img = base64.b64encode(body)
+    return img
+

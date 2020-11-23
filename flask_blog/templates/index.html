@@ -1,4 +1,29 @@
 {% extends "layout.html" %}
 {% block body %}
-<html><h1>測定結果</h1><p><p><img src="/graph1.png" ></img></html>
+<script type="text/javascript">
+function getImg(obj) {
+    var idx = obj.selectedIndex;
+    var value = obj.options[idx].value;
+    var plotdata = document.getElementById('s3img');
+    $.get("/img/" + value, function(data) {
+        plotdata.src = "data:image/png:base64," + data;
+    });
+};
+</script>
+
+<h1>測定結果</h1>
+<p><p>
+    <img src="/graph1.png" ></img>
+<div>
+    <p>select a image</p>
+    <select id=selector onchange="getImg(this)">
+        {% for entry in entries %}
+        <option value="{{ entry.fileName }}">{{ entry.fileName }}</option>
+        {% else %}
+        {% endfor %}
+    </select>
+</div>
+
+<br/>
+<img id=s3img></img>
 {% endblock %}
