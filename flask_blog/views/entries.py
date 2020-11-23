@@ -25,6 +25,7 @@ import base64
 @login_required
 def show_entries():
     entries = Entry.scan()
+    entries = sorted(entries, key=lambda x: x.MeasureDateTime)
     #entries = sorted(entries, key=lambda x: x.MeasureDateTime, reverse=True)
     return render_template('index.html', entries=entries)
     #return render_template('index.html')
