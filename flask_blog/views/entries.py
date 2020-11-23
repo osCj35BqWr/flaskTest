@@ -1,3 +1,7 @@
+from flask import request, redirect, url_for, render_template, flash, session
+from flask_blog import app
+from flask_login import login_required
+from datetime import datetime
 from flask import Flask, render_template, make_response
 from io import BytesIO
 import urllib
@@ -5,16 +9,19 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
-import random
 import numpy as np
 
-app = Flask(__name__)
-
 @app.route('/')
-def index():
-    return('<html><h1>実行結果</h1><p><p><img src="/graph1.png" ></img></html>')
+@login_required
+def show_entries():
+    #entries = Entry.scan()
+    #entries = sorted(entries, key=lambda x: x.id, reverse=True)
+    #return render_template('index.html', entries=entries)
+    return render_template('index.html')
+    #return('<html><h1>実行結果</h1><p><p><img src="/graph1.png" ></img></html>')
 
 @app.route('/graph1.png')
+@login_required
 def graph1():
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -40,12 +47,3 @@ def graph1():
     response.headers['Content-Type'] = 'image/png'
     response.headers['Content-Length'] = len(data)
     return response
-
-# /hello(http://127.0.0.1:5000/hello)にアクセスするとsample.htmlの中身が表示される
-@app.route('/hello')
-def hello():
-    return render_template("sample.html")
-
-if __name__ == '__main__':
-    # デバックモードでアプリを起動
-    app.run(debug=True)

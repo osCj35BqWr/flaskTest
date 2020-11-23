@@ -6,6 +6,11 @@ name = "pypi"
 [packages]
 numpy = "*"
 matplotlib = "*"
+flask = "*"
+flask-login = "*"
+flask-script = "*"
+zappa = "*"
+awscli = "*"
 
 [dev-packages]
 
