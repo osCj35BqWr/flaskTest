@@ -18,5 +18,21 @@
 <img id="s3img" width="70%"></img>
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script type=text/javascript src="{{ url_for('static', filename='script.js') }}"></script>
+<!--<script type=text/javascript src="{{ url_for('static', filename='script.js') }}"></script>-->
+<script type="text/javascript">
+function getImg(obj) {
+    var idx = obj.selectedIndex;
+    var value = obj.options[idx].value;
+    var plotdata = document.getElementById('s3img');
+
+    var eventDataBaseUrl = "{{ url_for('get_img_from_s3', func='DUMMY_VALUE') }}";
+    var actualDataUrl = eventDataBaseUrl.replace(/DUMMY_VALUE/, value);
+    alert(actualDataUrl)
+
+    $.get(actualDataUrl, function(data) {
+        plotdata.src = "data:image/jpeg;base64," + data;
+    });
+};
+</script>
+
 {% endblock %}
