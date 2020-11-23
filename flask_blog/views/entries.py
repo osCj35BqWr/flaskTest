@@ -19,12 +19,24 @@ import japanize_matplotlib
 import matplotlib.dates as mdates
 import os
 import base64
+from datetime import datetime, timedelta, timezone
 
 
 @app.route('/')
 @login_required
 def show_entries():
-    entries = Entry.scan()
+    # 全件検索
+    # entries = Entry.scan()
+    # 条件指定(キーを指定せずに検索）
+    # entries = Entry.scan(Entry.MeasureDateTime.contains('20201123'))
+
+    # 1日前の時間表記(yyyyMMddhhmmss)を取得する
+    yesterday = (datetime.now(timezone(timedelta(hours=+9), 'JST')) - timedelta(days=1)).strftime('%Y%m%d%H%M%S')
+
+    # 1日前までのデータをDynamoDBより取得する
+    entries = Entry.scan(Entry.MeasureDateTime >= yesterday)
+    # 条件指定(キーを指定してから検索）
+    # entries = Entry.query("aaa", Entry.MeasureDateTime.contains('20201123'))
     entries = sorted(entries, key=lambda x: x.MeasureDateTime)
     #entries = sorted(entries, key=lambda x: x.MeasureDateTime, reverse=True)
     return render_template('index.html', entries=entries)
@@ -42,20 +54,34 @@ def graph1():
     #   環境編巣にAWS_DEFAULT_PROFILE, AWS_PROFILEとして定義した。
     dynamodb = boto3.resource("dynamodb")
 
-    table = dynamodb.Table(os.environ['table_name'])
-    response = table.scan()
+    # TODO 2回DBにアクセスする理由はないので後で修正する
+    # 1日前の時間表記(yyyyMMddhhmmss)を取得する
+    yesterday = (datetime.now(timezone(timedelta(hours=+9), 'JST')) - timedelta(days=1)).strftime('%Y%m%d%H%M%S')
 
-    df = pd.json_normalize(response["Items"])
+    # 1日前までのデータをDynamoDBより取得する
+    entries = Entry.scan(Entry.MeasureDateTime >= yesterday)
+    entries = sorted(entries, key=lambda x: x.MeasureDateTime)
+
+    df = pd.DataFrame(columns=["人数"])
+    for entry in entries:
+        df.loc[entry.MeasureDateTime] = entry.value
+
+    #table = dynamodb.Table(os.environ['table_name'])
+    #response = table.scan()
+
+    #df = pd.json_normalize(response["Items"])
 
     # YYYYMMDDHHMMSS形式を日付として認識させる
-    df.MeasureDateTime = pd.to_datetime(df.MeasureDateTime)
+    df.index = pd.to_datetime(df.index)
+    #df.MeasureDateTime = pd.to_datetime(df.MeasureDateTime)
 
     # data["value"]はDecimalで入っているが。
     # Decimalは直接表示できないので、floatに変換
-    df = df.astype({"value": float})
+    df = df.astype({"人数": float})
+    #df = df.astype({"value": float})
 
     # 日付でソートする。戻り値を受け取らないとソートされないので注意
-    df = df.sort_values(by='MeasureDateTime')
+    #df = df.sort_values(by='MeasureDateTime')
 
     fig, ax = plt.subplots()
 
@@ -66,13 +92,14 @@ def graph1():
     # 補助目盛線を付加する
     ax.xaxis.set_minor_locator(mdates.HourLocator())
 
-
-    plt.plot(df.MeasureDateTime, df.value)
+    plt.plot(df.index, df["人数"])
+    #plt.plot(df.MeasureDateTime, df.value)
     # ax.plot(df.MeasureDateTime, df.value)というのもある
+
     plt.title('時間と人数の推移')
     # plt.xlabel('X軸ラベル')
     # plt.ylabel('人数')
-    plt.ylabel("人数", rotation=0)
+    plt.ylabel("人数", rotation=0, labelpad=20)
     # 縦書きにする場合
     # ax.set_ylabel("人\n数", rotation=0, va='center')
 
