@@ -2,7 +2,7 @@
 {% block body %}
 <h1>測定結果</h1>
 <p><p>
-    <img src="/graph1.png" ></img>
+    <img src="{{ url_for('graph1') }}"></img>
 <div class="form-group">
     <label for="selector">Select Image</label>
     <select id="selector" class="form-control" style="width:auto;" onchange="getImg(this)" >
@@ -18,5 +18,22 @@
 <img id="s3img" width="70%"></img>
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="/static/js/script.js"></script>
+<!--現状javascriptをHTML内に直書きしている理由-->
+<!--javascript内でurl_forを使用したい。jsを別ファイルに分けるとurl_forが使えない（今の所）-->
+<!--<script type=text/javascript src="{{ url_for('static', filename='script.js') }}"></script>-->
+<script type="text/javascript">
+function getImg(obj) {
+    var idx = obj.selectedIndex;
+    var value = obj.options[idx].value;
+    var plotdata = document.getElementById('s3img');
+
+    var eventDataBaseUrl = "{{ url_for('get_img_from_s3', func='DUMMY_VALUE') }}";
+    var actualDataUrl = eventDataBaseUrl.replace(/DUMMY_VALUE/, value);
+
+    $.get(actualDataUrl, function(data) {
+        plotdata.src = "data:image/jpeg;base64," + data;
+    });
+};
+</script>
+
 {% endblock %}
