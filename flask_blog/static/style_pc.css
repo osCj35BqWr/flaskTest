@@ -1,0 +1,5 @@
+@media print, screen and (min-width: 640px) {
+ 
+#s3img {width : 80%; }
+ 
+}/* ←CSSの一番最後に記述 */

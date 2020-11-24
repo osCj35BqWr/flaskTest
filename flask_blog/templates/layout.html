@@ -1,12 +1,17 @@
 <!doctype html>
 <title>AmazonRekognition_Test</title>
 
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <link href="https://fonts.googleapis.com/earlyaccess/mplus1p.css" rel="stylesheet" type="text/css">
+
 <link rel=stylesheet href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" media="(min-width: 640px)" href="{{ url_for('static', filename='style_pc.css') }}">
+<link rel="stylesheet" media="(max-width: 640px)" href="{{ url_for('static', filename='style_mobile.css') }}">
 
 <div class="container">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
